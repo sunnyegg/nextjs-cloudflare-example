@@ -14,7 +14,10 @@ export default function Home() {
   if (getUser.isError) {
     // Not logged in
     if (getUser.error.name === "AuthSessionMissingError") {
-      router.push("/login");
+      setTimeout(() => {
+        router.push("/login");
+      }, 100);
+      return;
     }
     return <div>Error: {getUser.error.message}</div>;
   }
