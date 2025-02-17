@@ -42,11 +42,11 @@ export default function Login() {
   };
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-4">
       <h1>Login</h1>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <form className="space-y-2" onSubmit={form.handleSubmit(handleSubmit)}>
           <FormField
             control={form.control}
             name="email"
@@ -74,19 +74,23 @@ export default function Login() {
               </FormItem>
             )}
           />
+
+          <Button className="w-full" variant={"outline"}>
+            Submit
+          </Button>
         </form>
       </Form>
 
-      <div>
-        <Button
-          className="w-full"
-          variant={"outline"}
-          onClick={handleGoogleLogin}
-        >
-          <Image src={Google} alt="Google" width={20} height={20} />
-          Sign in with Google
-        </Button>
-      </div>
+      <hr />
+
+      <Button
+        className="w-full"
+        variant={"outline"}
+        onClick={handleGoogleLogin}
+      >
+        <Image src={Google} alt="Google" width={20} height={20} />
+        Sign in with Google
+      </Button>
     </div>
   );
 }
