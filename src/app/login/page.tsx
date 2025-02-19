@@ -16,8 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-import supabase from "@/service/supabase";
+import useLogin from "@/query/mutation/useLogin";
 
 const LoginSchema = z.object({
   email: z.string().email(),
@@ -25,6 +24,8 @@ const LoginSchema = z.object({
 });
 
 export default function Login() {
+  const login = useLogin();
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -37,12 +38,15 @@ export default function Login() {
     console.log(data);
   };
 
-  const handleGoogleLogin = () => {
-    supabase.auth.signInWithOAuth({ provider: "google" });
+  const handleGoogleLogin = async () => {
+    const data = await login.mutateAsync("google");
+    if (data.url) {
+      window.location.href = data.url;
+    }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4">
       <h1>Login</h1>
 
       <Form {...form}>
@@ -86,7 +90,7 @@ export default function Login() {
       <Button
         className="w-full"
         variant={"outline"}
-        onClick={handleGoogleLogin}
+        onClick={() => handleGoogleLogin()}
       >
         <Image src={Google} alt="Google" width={20} height={20} />
         Sign in with Google

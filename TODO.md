@@ -2,16 +2,13 @@
 
 ## Database Setup
 
-- [ ] Create Supabase table for users
-  - Fields: id, identity_id, role_id, email, created_at
-- [ ] Create Supabase table for profiles
-  - Fields: id, user_id, name, avatar_url, created_at
-    - user_id references users.id
-- [ ] Create Supabase table for roles
-  - Fields: id, name, created_at
+- [x] Create Supabase table for profiles
+  - Fields: id, role_id, full_name, avatar_url, created_at, updated_at
+- [x] Create Supabase table for roles
+  - Fields: id, name, created_at, updated_at
     - name: admin, supervisor, user
-- [ ] Set up RLS (Row Level Security) policies
-  - [ ] Only allow users to modify their own data
+- [x] Set up RLS (Row Level Security) policies
+  - [x] Only allow users to modify their own data
 
 ## Type Definitions
 

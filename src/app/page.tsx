@@ -1,31 +1,37 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import useGetUser from "@/query/get/useGetUser";
+import useGetProfile from "@/query/get/useGetProfile";
+import { createClient } from "@/lib/supabase/client";
+
 import { Button } from "@/components/ui/button";
-import supabase from "@/service/supabase";
+import ProfileForm from "@/components/form/profile";
 
 export default function Home() {
   const router = useRouter();
+  const getProfile = useGetProfile();
 
-  const getUser = useGetUser();
-  if (getUser.isPending) {
+  if (getProfile.isPending) {
     return <div>Loading...</div>;
   }
 
-  if (getUser.isError) {
+  if (getProfile.isError) {
     // Not logged in
-    if (getUser.error.name === "AuthSessionMissingError") {
+    if (getProfile.error.name === "AuthSessionMissingError") {
       setTimeout(() => {
         router.push("/login");
       }, 100);
       return;
     }
-    return <div>Error: {getUser.error.message}</div>;
+
+    setTimeout(async () => {
+      await signOut();
+    }, 1000);
+    return <div>Error: {getProfile.error.message}</div>;
   }
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
+    const error = await signOut();
     if (error) {
       return <div>Error: {error.message}</div>;
     }
@@ -40,8 +46,11 @@ export default function Home() {
   };
 
   return (
-    <div className="space-y-4">
-      <p>Hello, {getUser.data.user.user_metadata.name}!</p>
+    <div className="space-y-4 p-4">
+      <p>Hello, {getProfile.data.full_name}!</p>
+
+      <ProfileForm profile={getProfile.data} />
+
       <Button
         className="w-full"
         onClick={() => handleSignOut()}
@@ -52,3 +61,9 @@ export default function Home() {
     </div>
   );
 }
+
+const signOut = async () => {
+  const supabase = createClient();
+  const { error } = await supabase.auth.signOut();
+  return error;
+};
