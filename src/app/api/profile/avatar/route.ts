@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
     if (obj === null) {
       return new Response("Object  Not Found", { status: 404 });
     }
-    return new Response(obj.body);
+
+    return new Response(request.nextUrl.href);
   } catch (err) {
     console.log(err);
     return Response.json({ status: "error" });
