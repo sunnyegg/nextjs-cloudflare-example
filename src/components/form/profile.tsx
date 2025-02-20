@@ -100,7 +100,7 @@ export default function ProfileForm(props: ProfileFormProps) {
         <FormField
           control={form.control}
           name="avatar_url"
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Avatar</FormLabel>
               <FormControl>
