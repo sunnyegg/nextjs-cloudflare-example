@@ -26,21 +26,20 @@
 
   "r2_buckets": [
     {
-      "binding": "MY_BUCKET",
-      "bucket_name": "MY_BUCKET_NAME"
+      "binding": "AVATARS",
+      "bucket_name": "avatars"
     }
-  ],
+  ]
 
   /**
    * Environment Variables
    * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
    */
-  "vars": {
-    "NEXT_PUBLIC_SUPABASE_URL": "production_value",
-    "NEXT_PUBLIC_SUPABASE_PUBLIC_KEY": "production_value",
-    "SUPABASE_SERVER_KEY": "production_value",
-    "JWT_SECRET": "production_value"
-  }
+  // "vars": {
+  //   "NEXT_PUBLIC_SUPABASE_URL": "production_value",
+  //   "NEXT_PUBLIC_SUPABASE_PUBLIC_KEY": "production_value",
+  //   "NEXT_PUBLIC_APP_URL": "production_value"
+  // }
   /**
    * Note: Use secrets to store sensitive data.
    * https://developers.cloudflare.com/workers/configuration/secrets/

@@ -19,12 +19,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+import { Loader2Icon } from "lucide-react";
 
 import useGetRoles from "@/query/get/useGetRoles";
+import useUploadAvatar from "@/query/mutation/useUploadAvatar";
+import useGetAvatar from "@/query/get/useGetAvatar";
 
 const UpdateProfileSchema = z.object({
   full_name: z.string().min(5),
-  avatar_url: z.string().url(),
+  avatar_url: z.string(),
   role_id: z.string().optional(),
 });
 
@@ -39,6 +44,8 @@ interface ProfileFormProps {
 export default function ProfileForm(props: ProfileFormProps) {
   const { profile } = props;
   const getRoles = useGetRoles({ enabled: true });
+  const uploadAvatar = useUploadAvatar();
+  const getAvatar = useGetAvatar(profile.avatar_url);
 
   const form = useForm({
     defaultValues: {
@@ -53,6 +60,26 @@ export default function ProfileForm(props: ProfileFormProps) {
     console.log(data);
   };
 
+  const handleAvatarChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    event.preventDefault();
+    form.clearErrors("avatar_url");
+
+    const file = event.target.files?.[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      await uploadAvatar.mutateAsync(file);
+    } else {
+      form.setError("avatar_url", {
+        type: "required",
+        message: "Please select an image",
+      });
+    }
+  };
+
   return (
     <Form {...form}>
       <form className="space-y-2" onSubmit={form.handleSubmit(handleSubmit)}>
@@ -64,6 +91,36 @@ export default function ProfileForm(props: ProfileFormProps) {
               <FormLabel>Full Name</FormLabel>
               <FormControl>
                 <Input {...field} placeholder="Full Name" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="avatar_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Avatar</FormLabel>
+              <FormControl>
+                <div className="flex items-center gap-2">
+                  <Avatar className="w-16 h-16">
+                    <AvatarImage src={getAvatar.data} />
+                    <AvatarFallback>
+                      {uploadAvatar.isPending || getAvatar.isPending ? (
+                        <Loader2Icon className="animate-spin" />
+                      ) : (
+                        form.getValues("full_name").slice(0, 2)
+                      )}
+                    </AvatarFallback>
+                  </Avatar>
+                  <Input
+                    type="file"
+                    className="pt-1 md:pt-1.5"
+                    onChange={handleAvatarChange}
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
