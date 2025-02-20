@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       return new Response("Object  Not Found", { status: 404 });
     }
 
-    return new Response(request.nextUrl.href);
+    return new Response(obj.body);
   } catch (err) {
     console.log(err);
     return Response.json({ status: "error" });
