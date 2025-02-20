@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { Provider } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { NextRequest } from "next/server";
-import { getRequestContext } from "@cloudflare/next-on-pages";
 
 export const runtime = "edge";
 
@@ -19,7 +18,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const appUrl = getRequestContext().env.NEXT_PUBLIC_APP_URL;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({

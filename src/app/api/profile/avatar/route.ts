@@ -1,12 +1,11 @@
-import { getRequestContext } from "@cloudflare/next-on-pages";
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3Client } from "@aws-sdk/client-s3";
 import type { NextRequest } from "next/server";
 
-const ACCOUNT_ID = getRequestContext().env.ACCOUNT_ID;
-const ACCESS_KEY_ID = getRequestContext().env.ACCESS_KEY_ID;
-const SECRET_ACCESS_KEY = getRequestContext().env.SECRET_ACCESS_KEY;
+const ACCOUNT_ID = process.env.ACCOUNT_ID!;
+const ACCESS_KEY_ID = process.env.ACCESS_KEY_ID!;
+const SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY!;
 
 const S3 = new S3Client({
   region: "auto",
@@ -34,7 +33,8 @@ export async function GET(request: NextRequest) {
       }
     );
     return Response.json({ url });
-  } catch (error: any) {
+  } catch (error) {
+    // @ts-expect-error error
     return Response.json({ error: error.message });
   }
 }
@@ -69,7 +69,8 @@ export async function POST(request: NextRequest) {
     }
 
     return Response.json({ message: "success" });
-  } catch (error: any) {
+  } catch (error) {
+    // @ts-expect-error error
     return Response.json({ error: error.message });
   }
 }
