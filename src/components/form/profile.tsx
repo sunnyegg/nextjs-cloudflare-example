@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -43,9 +44,11 @@ interface ProfileFormProps {
 
 export default function ProfileForm(props: ProfileFormProps) {
   const { profile } = props;
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url);
+
   const getRoles = useGetRoles({ enabled: true });
   const uploadAvatar = useUploadAvatar();
-  const getAvatar = useGetAvatar(profile.avatar_url);
+  const getAvatar = useGetAvatar(avatarUrl);
 
   const form = useForm({
     defaultValues: {
@@ -71,7 +74,14 @@ export default function ProfileForm(props: ProfileFormProps) {
       const formData = new FormData();
       formData.append("file", file);
 
+      // Upload the file to Cloudflare R2
       await uploadAvatar.mutateAsync(file);
+
+      // Update the form value to the filename
+      form.setValue("avatar_url", file.name);
+      setAvatarUrl(file.name);
+
+      await getAvatar.refetch();
     } else {
       form.setError("avatar_url", {
         type: "required",
@@ -106,20 +116,21 @@ export default function ProfileForm(props: ProfileFormProps) {
               <FormControl>
                 <div className="flex items-center gap-2">
                   <Avatar className="w-16 h-16">
-                    <AvatarImage src={getAvatar.data} />
+                    <AvatarImage src={getAvatar.data?.url} />
                     <AvatarFallback>
-                      {uploadAvatar.isPending || getAvatar.isPending ? (
-                        <Loader2Icon className="animate-spin" />
-                      ) : (
-                        form.getValues("full_name").slice(0, 2)
-                      )}
+                      {form.getValues("full_name").slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
+
                   <Input
                     type="file"
                     className="pt-1 md:pt-1.5"
                     onChange={handleAvatarChange}
                   />
+
+                  {uploadAvatar.isPending && (
+                    <Loader2Icon className="animate-spin" />
+                  )}
                 </div>
               </FormControl>
               <FormMessage />
@@ -142,7 +153,7 @@ export default function ProfileForm(props: ProfileFormProps) {
                 {getRoles.isPending ? (
                   <div>Loading...</div>
                 ) : (
-                  <SelectContent className="w-[300px]">
+                  <SelectContent>
                     {getRoles.data &&
                       getRoles.data.map((role) => (
                         <SelectItem key={role.id} value={role.id}>

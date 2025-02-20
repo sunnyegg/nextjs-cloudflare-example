@@ -5,14 +5,12 @@ export default function useUploadAvatar() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("filename", file.name);
 
-      const response = await fetch(
-        "/api/profile/avatar?filename=" + file.name,
-        {
-          method: "PUT",
-          body: formData,
-        }
-      );
+      const response = await fetch("/api/profile/avatar", {
+        method: "POST",
+        body: formData,
+      });
       const data = await response.json();
       if (!response.ok) {
         throw data;

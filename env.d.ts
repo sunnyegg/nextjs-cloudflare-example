@@ -4,5 +4,8 @@ interface CloudflareEnv {
 	NEXT_PUBLIC_SUPABASE_URL: string;
 	NEXT_PUBLIC_SUPABASE_PUBLIC_KEY: string;
 	NEXT_PUBLIC_APP_URL: string;
+	ACCOUNT_ID: string;
+	ACCESS_KEY_ID: string;
+	SECRET_ACCESS_KEY: string;
 	AVATARS: R2Bucket;
 }
