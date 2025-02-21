@@ -21,34 +21,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { Loader2Icon } from "lucide-react";
 
 import useGetRoles from "@/query/get/useGetRoles";
 import useUploadAvatar from "@/query/mutation/useUploadAvatar";
 import useGetAvatar from "@/query/get/useGetAvatar";
+import useUpdateProfile from "@/query/mutation/useUpdateProfile";
+
+import { UpdateProfileRequest } from "@/types/profiles";
+
+import { useToast } from "@/hooks/use-toast";
 
 const UpdateProfileSchema = z.object({
   full_name: z.string().min(5),
   avatar_url: z.string(),
-  role_id: z.string().optional(),
+  role_id: z.string().uuid(),
 });
 
 interface ProfileFormProps {
-  profile: {
-    full_name: string;
-    avatar_url: string;
-    role_id: string;
-  };
+  profile: UpdateProfileRequest;
 }
 
 export default function ProfileForm(props: ProfileFormProps) {
   const { profile } = props;
+  const { toast } = useToast();
+
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url);
 
   const getRoles = useGetRoles({ enabled: true });
   const uploadAvatar = useUploadAvatar();
   const getAvatar = useGetAvatar(avatarUrl);
+  const updateProfile = useUpdateProfile();
 
   const form = useForm({
     defaultValues: {
@@ -59,8 +64,28 @@ export default function ProfileForm(props: ProfileFormProps) {
     resolver: zodResolver(UpdateProfileSchema),
   });
 
-  const handleSubmit = (data: z.infer<typeof UpdateProfileSchema>) => {
-    console.log(data);
+  const handleSubmit = async (data: z.infer<typeof UpdateProfileSchema>) => {
+    try {
+      await updateProfile.mutateAsync(data);
+      toast({
+        title: "Success ✅",
+        description: "Your profile has been updated successfully",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        toast({
+          title: "Error ❌",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error ❌",
+          description: "Unknown error",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const handleAvatarChange = async (
@@ -115,22 +140,22 @@ export default function ProfileForm(props: ProfileFormProps) {
               <FormLabel>Avatar</FormLabel>
               <FormControl>
                 <div className="flex items-center gap-2">
-                  <Avatar className="w-16 h-16">
-                    <AvatarImage src={getAvatar.data} />
-                    <AvatarFallback>
-                      {form.getValues("full_name").slice(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
+                  {getAvatar.isPending || uploadAvatar.isPending ? (
+                    <Skeleton className="w-16 h-16 rounded-full" />
+                  ) : (
+                    <Avatar className="w-16 h-16">
+                      <AvatarImage src={getAvatar.data} />
+                      <AvatarFallback>
+                        {form.getValues("full_name").slice(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
 
                   <Input
                     type="file"
                     className="pt-1 md:pt-1.5"
                     onChange={handleAvatarChange}
                   />
-
-                  {uploadAvatar.isPending && (
-                    <Loader2Icon className="animate-spin" />
-                  )}
                 </div>
               </FormControl>
               <FormMessage />
@@ -168,8 +193,16 @@ export default function ProfileForm(props: ProfileFormProps) {
           )}
         />
 
-        <Button className="w-full" variant={"outline"}>
-          Submit
+        <Button
+          className="w-full"
+          variant={"outline"}
+          disabled={uploadAvatar.isPending}
+        >
+          {updateProfile.isPending ? (
+            <Loader2Icon className="animate-spin" />
+          ) : (
+            "Submit"
+          )}
         </Button>
       </form>
     </Form>

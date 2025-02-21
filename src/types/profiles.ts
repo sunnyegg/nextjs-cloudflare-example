@@ -13,4 +13,4 @@ export type GetProfile = {
   avatar_url: string;
 };
 
-export type UpdateProfileRequest = keyof GetProfile;
+export type UpdateProfileRequest = GetProfile;
