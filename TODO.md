@@ -12,25 +12,17 @@
 
 ## Type Definitions
 
-- [ ] Create User type
-- [ ] Create Profile type
-- [ ] Create Role type
-- [ ] Create API response types
+- [x] Create Profile type
+- [x] Create Role type
+- [x] Create API response types
 
 ## API Integration
 
-- [ ] Create User CRUD operations
-  - [ ] useGetUsers query hook
-  - [ ] useCreateUser mutation hook
-  - [ ] useUpdateUser mutation hook
-  - [ ] useDeleteUser mutation hook
-- [ ] Create Profile CRUD operations
-  - [ ] useGetProfile query hook
-  - [ ] useCreateProfile mutation hook
-  - [ ] useUpdateProfile mutation hook
-  - [ ] useDeleteProfile mutation hook
-- [ ] Create Role CRUD operations
-  - [ ] useGetRoles query hook
-  - [ ] useCreateRole mutation hook
-  - [ ] useUpdateRole mutation hook
-  - [ ] useDeleteRole mutation hook
+- [x] Create Profile CRUD operations
+  - [x] useGetProfile query hook
+  - [x] useGetAvatar query hook
+  - [x] useUploadAvatar mutation hook
+  - [x] useUpdateProfile mutation hook
+- [x] Create Role CRUD operations
+  - [x] useGetRoles query hook
+- [x] Create Login mutation hook
