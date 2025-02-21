@@ -3,6 +3,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3Client } from "@aws-sdk/client-s3";
 import type { NextRequest } from "next/server";
 import { CreateResponseApiError, CreateResponseApiSuccess } from "@/lib/utils";
+import { cache } from "@/lib/cache";
 
 const ACCOUNT_ID = process.env.ACCOUNT_ID!;
 const ACCESS_KEY_ID = process.env.ACCESS_KEY_ID!;
@@ -22,6 +23,13 @@ export const runtime = "edge";
 // Get Pre-Signed URL for Download
 export async function GET(request: NextRequest) {
   const filename = request.nextUrl.searchParams.get("filename") as string;
+
+  // Get url from cache
+  const cachedUrl = cache.get("avatar-url-" + filename);
+  if (cachedUrl) {
+    return CreateResponseApiSuccess(cachedUrl);
+  }
+
   try {
     const url = await getSignedUrl(
       S3,
@@ -33,6 +41,10 @@ export async function GET(request: NextRequest) {
         expiresIn: 600,
       }
     );
+
+    // Cache the url for 600 seconds
+    cache.set("avatar-url-" + filename, url, 600 * 1000);
+
     return CreateResponseApiSuccess(url);
   } catch (error) {
     if (error instanceof Error) {

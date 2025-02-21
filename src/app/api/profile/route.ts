@@ -1,3 +1,4 @@
+import { cache } from "@/lib/cache";
 import { createClient } from "@/lib/supabase/server";
 import { CreateResponseApiError, CreateResponseApiSuccess } from "@/lib/utils";
 import { GetProfile, UpdateProfileRequest } from "@/types/profiles";
@@ -11,6 +12,13 @@ export async function GET() {
   if (error) {
     return CreateResponseApiError(error, error.status);
   }
+
+  // Get profile from cache
+  const cachedProfile = cache.get("profile-" + userSession.user.id);
+  if (cachedProfile) {
+    return CreateResponseApiSuccess(cachedProfile);
+  }
+
   const profileData = await supabase
     .from("profiles")
     .select("role_id,full_name,avatar_url")
@@ -23,6 +31,13 @@ export async function GET() {
   if (profileData.data.length === 0) {
     return CreateResponseApiError(new Error("Profile not found"), 404);
   }
+
+  // Cache the profile for 10 minutes
+  cache.set(
+    "profile-" + userSession.user.id,
+    profileData.data[0],
+    10 * 60 * 1000
+  );
 
   const outputData = profileData.data[0] as GetProfile;
 
@@ -45,6 +60,9 @@ export async function PUT(request: NextRequest) {
   if (error) {
     return CreateResponseApiError(error);
   }
+
+  // Remove the cached profile
+  cache.delete("profile-" + data.user.id);
 
   return CreateResponseApiSuccess(body);
 }

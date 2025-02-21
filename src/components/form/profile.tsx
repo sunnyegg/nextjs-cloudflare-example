@@ -1,5 +1,4 @@
 import * as z from "zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -48,11 +47,9 @@ export default function ProfileForm(props: ProfileFormProps) {
   const { profile } = props;
   const { toast } = useToast();
 
-  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url);
-
   const getRoles = useGetRoles({ enabled: true });
   const uploadAvatar = useUploadAvatar();
-  const getAvatar = useGetAvatar(avatarUrl);
+  const getAvatar = useGetAvatar(profile.avatar_url);
   const updateProfile = useUpdateProfile();
 
   const form = useForm({
@@ -104,7 +101,6 @@ export default function ProfileForm(props: ProfileFormProps) {
 
       // Update the form value to the filename
       form.setValue("avatar_url", file.name);
-      setAvatarUrl(file.name);
 
       await getAvatar.refetch();
     } else {
