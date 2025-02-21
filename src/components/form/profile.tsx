@@ -130,10 +130,12 @@ export default function ProfileForm(props: ProfileFormProps) {
         setAvatarUrl(file.name);
 
         await getAvatar.refetch();
-      } catch (error) {
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
         toast({
           title: "Error ❌",
-          description: "Unknown error",
+          description: error.message || "Unknown error",
           variant: "destructive",
         });
       }
