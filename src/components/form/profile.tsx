@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -35,7 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const UpdateProfileSchema = z.object({
   full_name: z.string().min(5),
-  avatar_url: z.string(),
+  avatar_url: z.string().min(5, "Invalid avatar"),
   role_id: z.string().uuid(),
 });
 
@@ -47,9 +48,12 @@ export default function ProfileForm(props: ProfileFormProps) {
   const { profile } = props;
   const { toast } = useToast();
 
+  // State to store the avatar url
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url);
+
   const getRoles = useGetRoles({ enabled: true });
   const uploadAvatar = useUploadAvatar();
-  const getAvatar = useGetAvatar(profile.avatar_url);
+  const getAvatar = useGetAvatar(avatarUrl);
   const updateProfile = useUpdateProfile();
 
   const form = useForm({
@@ -96,13 +100,43 @@ export default function ProfileForm(props: ProfileFormProps) {
       const formData = new FormData();
       formData.append("file", file);
 
-      // Upload the file to Cloudflare R2
-      await uploadAvatar.mutateAsync(file);
+      // Check file type
+      if (!file.type.startsWith("image/")) {
+        form.setError("avatar_url", {
+          type: "invalid",
+          message: "Invalid file type",
+        });
+        form.setValue("avatar_url", "");
+        return;
+      }
 
-      // Update the form value to the filename
-      form.setValue("avatar_url", file.name);
+      // Check file size
+      // Max file size is 2MB
+      if (file.size > 1024 * 1024 * 2) {
+        form.setError("avatar_url", {
+          type: "invalid",
+          message: "File too large",
+        });
+        form.setValue("avatar_url", "");
+        return;
+      }
 
-      await getAvatar.refetch();
+      try {
+        // Upload the file to Cloudflare R2
+        await uploadAvatar.mutateAsync(file);
+
+        // Update the form value to the filename
+        form.setValue("avatar_url", file.name);
+        setAvatarUrl(file.name);
+
+        await getAvatar.refetch();
+      } catch (error) {
+        toast({
+          title: "Error ❌",
+          description: "Unknown error",
+          variant: "destructive",
+        });
+      }
     } else {
       form.setError("avatar_url", {
         type: "required",
