@@ -116,7 +116,7 @@ export default function ProfileForm(props: ProfileFormProps) {
               <FormControl>
                 <div className="flex items-center gap-2">
                   <Avatar className="w-16 h-16">
-                    <AvatarImage src={getAvatar.data?.url} />
+                    <AvatarImage src={getAvatar.data} />
                     <AvatarFallback>
                       {form.getValues("full_name").slice(0, 2)}
                     </AvatarFallback>

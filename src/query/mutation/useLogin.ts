@@ -1,4 +1,8 @@
+import { Login } from "@/types/login";
+import { ResponseApiError, ResponseApiSuccess } from "@/types/responses";
 import { useMutation } from "@tanstack/react-query";
+
+type ResponseApi = ResponseApiSuccess<Login> | ResponseApiError;
 
 export default function useLogin() {
   return useMutation({
@@ -13,14 +17,13 @@ export default function useLogin() {
         },
         body: JSON.stringify(payload),
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw data;
+      const data = (await response.json()) as ResponseApi;
+
+      if (data.isError) {
+        throw data.error;
       }
-      return data as {
-        provider: string;
-        url: string;
-      };
+
+      return data.data;
     },
   });
 }

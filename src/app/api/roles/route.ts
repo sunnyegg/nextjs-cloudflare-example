@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { CreateResponseApiError, CreateResponseApiSuccess } from "@/lib/utils";
 
 export const runtime = "edge";
 
@@ -6,9 +7,10 @@ export async function GET() {
   const supabase = await createClient();
   const { data, error } = await supabase.from("roles").select("id,name");
   if (error) {
-    return new Response(JSON.stringify(error), {
-      status: 500,
-    });
+    return CreateResponseApiError(error, 500);
   }
-  return new Response(JSON.stringify(data));
+  if (data.length === 0) {
+    return CreateResponseApiError(new Error("No roles found"), 404);
+  }
+  return CreateResponseApiSuccess(data);
 }

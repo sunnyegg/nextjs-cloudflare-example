@@ -2,6 +2,7 @@ import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3Client } from "@aws-sdk/client-s3";
 import type { NextRequest } from "next/server";
+import { CreateResponseApiError, CreateResponseApiSuccess } from "@/lib/utils";
 
 const ACCOUNT_ID = process.env.ACCOUNT_ID!;
 const ACCESS_KEY_ID = process.env.ACCESS_KEY_ID!;
@@ -32,10 +33,12 @@ export async function GET(request: NextRequest) {
         expiresIn: 600,
       }
     );
-    return Response.json({ url });
+    return CreateResponseApiSuccess(url);
   } catch (error) {
-    // @ts-expect-error error
-    return Response.json({ error: error.message });
+    if (error instanceof Error) {
+      return CreateResponseApiError(error);
+    }
+    return CreateResponseApiError(new Error("Unknown error"));
   }
 }
 

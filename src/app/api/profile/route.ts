@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { CreateResponseApiError, CreateResponseApiSuccess } from "@/lib/utils";
+import { GetProfile } from "@/types/profiles";
 
 export const runtime = "edge";
 
@@ -6,9 +8,7 @@ export async function GET() {
   const supabase = await createClient();
   const { data: userSession, error } = await supabase.auth.getUser();
   if (error) {
-    return new Response(JSON.stringify(error), {
-      status: error.status,
-    });
+    return CreateResponseApiError(error, error.status);
   }
   const profileData = await supabase
     .from("profiles")
@@ -16,18 +16,14 @@ export async function GET() {
     .eq("id", userSession.user.id);
 
   if (profileData.error) {
-    return new Response(JSON.stringify(profileData.error), {
-      status: 500,
-    });
+    return CreateResponseApiError(profileData.error, 500);
   }
 
   if (profileData.data.length === 0) {
-    return new Response(JSON.stringify({}), {
-      status: 404,
-    });
+    return CreateResponseApiError(new Error("Profile not found"), 404);
   }
 
-  const outputData = profileData.data[0];
+  const outputData = profileData.data[0] as GetProfile;
 
-  return new Response(JSON.stringify(outputData));
+  return CreateResponseApiSuccess(outputData);
 }
